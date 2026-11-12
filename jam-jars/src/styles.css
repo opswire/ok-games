@@ -1,0 +1,1503 @@
+:root {
+  --ink: #4a2e1a;
+  --ink-soft: #7a5638;
+  --cream: #fff7ea;
+  --paper: #fffdf8;
+  --accent: #d9482b;
+  --accent-dark: #a8331c;
+  --wood-1: #b07a4a;
+  --wood-2: #8a5a33;
+  --glass-edge: rgba(92, 60, 36, 0.38);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 18px;
+  color: var(--ink);
+  /* фон по бокам на компьютере: доски кухонного стола */
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 120px),
+    linear-gradient(180deg, #7d5435, #5e3d25);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+#app {
+  position: relative;
+  max-width: 480px;
+  height: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 70% at 50% 0%, #fffaf0 0%, transparent 70%),
+    linear-gradient(180deg, #fbefd9 0%, #f3dfbf 100%);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* ---------- экран игры ---------- */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.hud {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: calc(10px + var(--safe-top)) 12px 4px;
+  min-height: 56px;
+  flex-wrap: wrap;
+}
+
+.level-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.badge {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid var(--accent);
+  color: var(--accent-dark);
+}
+
+.board {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  min-height: 0;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 14px;
+}
+
+/* полка под рядом банок */
+.row::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 0;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--wood-1) 0 55%, var(--wood-2) 55% 100%);
+  box-shadow: 0 4px 8px rgba(60, 35, 15, 0.3);
+}
+
+.slot {
+  position: relative;
+  width: var(--slot-w);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-top: calc(var(--lift) + var(--layer-h) * 0.7);
+  cursor: pointer;
+}
+
+.slot.pouring {
+  z-index: 10;
+}
+
+.jar {
+  position: relative;
+  width: var(--jar-w);
+  transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+.slot.selected .jar {
+  transform: translateY(calc(var(--lift) * -1));
+}
+
+/* эффекты поверх поля: струя варенья, рука-указатель */
+.fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.hand {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.3));
+  animation: hand-bob 1s ease-in-out infinite;
+  transition:
+    left 250ms ease,
+    top 250ms ease;
+}
+
+@keyframes hand-bob {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(0, 12px) scale(0.94);
+  }
+}
+
+/* ---------- кнопки действий ---------- */
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px 10px calc(12px + var(--safe-bottom));
+}
+
+.act {
+  position: relative;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: 2px solid #c9a27a;
+  border-radius: 16px;
+  background: var(--cream);
+  box-shadow: 0 4px 0 #c9a27a;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.1;
+  cursor: pointer;
+  transition: transform 80ms, box-shadow 80ms;
+}
+
+.act:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #c9a27a;
+}
+
+.act.disabled {
+  opacity: 0.55;
+}
+
+.act svg {
+  width: 28px;
+  height: 28px;
+}
+
+.count {
+  position: absolute;
+  top: -10px;
+  right: -4px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 7px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  border: 2px solid #fff;
+}
+
+.count.video {
+  background: #2e7d32;
+}
+
+.count svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---------- общие кнопки, тосты, окна ---------- */
+
+.btn {
+  min-height: 56px;
+  padding: 10px 22px;
+  border: 2px solid #c9a27a;
+  border-radius: 16px;
+  background: var(--cream);
+  box-shadow: 0 4px 0 #c9a27a;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent-dark);
+  box-shadow: 0 4px 0 var(--accent-dark);
+  color: #fff;
+}
+
+.btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #c9a27a;
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: calc(110px + var(--safe-bottom));
+  max-width: 90%;
+  transform: translate(-50%, 20px);
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: rgba(58, 36, 20, 0.92);
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 200ms,
+    transform 200ms;
+  z-index: 50;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(40, 24, 12, 0.55);
+  z-index: 40;
+  animation: fade-in 180ms ease-out;
+}
+
+.modal-overlay.closing {
+  animation: fade-out 180ms ease-in forwards;
+}
+
+.modal {
+  width: 100%;
+  max-width: 380px;
+  padding: 24px 20px 20px;
+  border-radius: 22px;
+  background: var(--paper);
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  animation: pop-in 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-title {
+  margin: 0 0 10px;
+  font-size: 26px;
+}
+
+.modal-text {
+  margin: 0 0 18px;
+  font-size: 19px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hand {
+    animation: none;
+  }
+}
+
+.btn:focus,
+.act:focus {
+  outline: none;
+}
+
+.btn:focus-visible,
+.act:focus-visible,
+.icon-btn:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* ---------- общие для экранов ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: calc(10px + var(--safe-top)) 12px 6px;
+  min-height: 64px;
+}
+
+.icon-btn {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 2px solid #c9a27a;
+  border-radius: 14px;
+  background: var(--cream);
+  box-shadow: 0 3px 0 #c9a27a;
+  cursor: pointer;
+  padding: 0;
+}
+
+.icon-btn svg {
+  width: 28px;
+  height: 28px;
+}
+
+.icon-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #c9a27a;
+}
+
+.icon-btn-spacer {
+  width: 52px;
+  flex: none;
+}
+
+.coin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 4px 14px 4px 6px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid #e2c48d;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.coin-icon {
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+
+.screen-title {
+  margin: 0;
+  font-size: 26px;
+}
+
+/* игровой экран: кнопка «назад», заголовок, монеты */
+.hud {
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
+.hud-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hud .coin-pill {
+  font-size: 18px;
+  padding-right: 10px;
+}
+
+.hud .coin-icon {
+  width: 26px;
+  height: 26px;
+}
+
+/* ---------- маленькая банка ---------- */
+
+.mini-jar {
+  position: relative;
+  width: 34px;
+  height: 46px;
+  flex: none;
+}
+
+.mini-jar.empty-spot {
+  border: 2px dashed rgba(122, 86, 56, 0.35);
+  border-radius: 6px;
+  height: 38px;
+  margin-top: 8px;
+}
+
+/* ---------- главный экран ---------- */
+
+.main-screen {
+  align-items: stretch;
+  padding-bottom: calc(20px + var(--safe-bottom));
+}
+
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 0 16px;
+}
+
+.game-title {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1.05;
+  text-align: center;
+  color: var(--accent-dark);
+  text-shadow: 0 2px 0 #fff;
+}
+
+.hero-shelf {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding: 0 18px 12px;
+}
+
+.hero-shelf .mini-jar {
+  transform: scale(1.6);
+  transform-origin: bottom;
+  margin: 0 10px;
+}
+
+.hero-shelf::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--wood-1) 0 55%, var(--wood-2) 55% 100%);
+}
+
+.btn-play {
+  margin: 0 16px;
+  min-height: 72px;
+  font-size: 24px;
+}
+
+.menu-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 16px 0;
+}
+
+.menu-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 8px;
+}
+
+.menu-btn svg {
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+
+.dot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid #fff;
+  animation: dot-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes dot-pulse {
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* ---------- победа ---------- */
+
+.win-screen {
+  align-items: center;
+  text-align: center;
+  padding-bottom: calc(20px + var(--safe-bottom));
+}
+
+.win-screen .topbar {
+  align-self: stretch;
+  justify-content: flex-end;
+}
+
+.win-title {
+  margin: 10px 16px 4px;
+  font-size: 32px;
+  color: var(--accent-dark);
+}
+
+.win-sub {
+  margin: 0 0 18px;
+  color: var(--ink-soft);
+}
+
+.win-shelf {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px 10px;
+  max-width: 340px;
+  padding: 0 14px 14px;
+  min-height: 74px;
+}
+
+.win-shelf .mini-jar {
+  transform: scale(1.25);
+  transform-origin: bottom;
+  margin: 0 3px;
+}
+
+.win-shelf::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--wood-1) 0 55%, var(--wood-2) 55% 100%);
+}
+
+.win-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 8px;
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.win-reward .coin-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.win-banners {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 6px 16px;
+}
+
+.unlock-banner {
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #fff;
+  border: 2px dashed var(--accent);
+  font-weight: 700;
+}
+
+.win-buttons {
+  margin-top: auto;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.win-buttons .btn-play {
+  margin: 0;
+}
+
+/* ---------- кладовая ---------- */
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  padding: 0 14px calc(24px + var(--safe-bottom));
+}
+
+.pantry-text {
+  margin: 4px 0 14px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.decor-wall {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.decor-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 2px solid #e2c48d;
+  text-align: center;
+}
+
+.decor-tile svg {
+  width: 100%;
+  max-width: 64px;
+  aspect-ratio: 1;
+}
+
+.decor-tile.locked svg {
+  filter: grayscale(1) brightness(1.5) opacity(0.4);
+}
+
+.decor-name {
+  font-size: 14px;
+  line-height: 1.15;
+  font-weight: 600;
+}
+
+.pantry-shelf {
+  margin-bottom: 14px;
+}
+
+.shelf-name {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.shelf-jars {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  justify-items: center;
+  row-gap: 18px;
+  padding: 0 4px 16px;
+}
+
+.shelf-jars::after,
+.shelf-jars::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--wood-1) 0 55%, var(--wood-2) 55% 100%);
+}
+
+.shelf-jars::after {
+  bottom: 0;
+}
+
+.shelf-jars::before {
+  top: 49px;
+}
+
+/* ---------- окна: подарок ---------- */
+
+.modal-wide {
+  max-width: 440px;
+}
+
+.daily-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.daily-cell {
+  padding: 8px 4px;
+  border-radius: 14px;
+  border: 2px solid #e2c48d;
+  background: #fff;
+  font-size: 15px;
+  line-height: 1.15;
+}
+
+.daily-cell.big {
+  grid-column: span 3;
+}
+
+.daily-cell.today {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(217, 72, 43, 0.25);
+  background: #fff4ec;
+}
+
+.daily-cell.taken {
+  opacity: 0.5;
+}
+
+.daily-day {
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.daily-reward {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.daily-reward .coin-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---------- правки этапа 3 ---------- */
+
+.hero-shelf {
+  padding-top: 34px;
+}
+
+.decor-wall {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.win-shelf {
+  align-items: flex-end;
+  min-height: 0;
+  padding-top: 16px;
+}
+
+.toast {
+  bottom: auto;
+  top: calc(84px + var(--safe-top));
+  transform: translate(-50%, -12px);
+}
+
+.hud-title {
+  flex: 1;
+}
+
+.hud .level-title {
+  font-size: 22px;
+  white-space: nowrap;
+}
+
+.hud .badge {
+  font-size: 14px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* четыре кнопки внизу: подписи ужимаются на узких экранах, значки остаются крупными */
+.actions {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.act {
+  font-size: clamp(15px, 4.3vw, 18px);
+  padding: 6px 2px;
+}
+
+.act span:not(.count) {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.count.coin {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 6px 0 3px;
+  background: #fff;
+  color: var(--ink);
+  border-color: #e2c48d;
+}
+
+.count.coin .coin-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* три кнопки внизу, «Заново» — значком в шапке */
+.actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.act {
+  font-size: 18px;
+}
+
+.act span:not(.count) {
+  overflow-wrap: normal;
+}
+
+.hud {
+  gap: 6px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.hud-side {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.hud .icon-btn {
+  width: 48px;
+  height: 48px;
+}
+
+.hud .icon-btn.disabled {
+  opacity: 0.45;
+}
+
+.hud .level-title {
+  font-size: clamp(18px, 5.6vw, 24px);
+}
+
+.hud .coin-pill {
+  flex: none;
+  min-height: 40px;
+  padding: 2px 10px 2px 4px;
+}
+
+/* ---------- правки по ревью ---------- */
+
+/* шапка: плашка уровня — второй строкой */
+.hud {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+
+.badge-row {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.hud .level-title {
+  text-align: center;
+}
+
+/* экран победы: блоки не сжимаются, при нехватке высоты экран прокручивается */
+.win-screen {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.win-screen > * {
+  flex-shrink: 0;
+}
+
+.win-buttons {
+  padding-top: 12px;
+}
+
+/* главный экран: кнопки «Подарок» и «Кладовая» помещаются на 320 px */
+.menu-btn {
+  min-width: 0;
+  gap: 6px;
+  padding: 10px 6px;
+  font-size: clamp(17px, 5.4vw, 20px);
+}
+
+.menu-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* подписи нижних кнопок помещаются на 320 px */
+.act {
+  font-size: clamp(16px, 5.2vw, 18px);
+  padding: 6px 2px;
+}
+
+/* кладовая: карточки украшений не уже 84 px, длинные названия переносятся */
+.decor-wall {
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+}
+
+.decor-name {
+  font-size: 15px;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+/* кнопки победы всегда на виду, даже если сообщения не помещаются */
+.win-buttons {
+  position: sticky;
+  bottom: calc(-20px - var(--safe-bottom));
+  margin-bottom: calc(-20px - var(--safe-bottom));
+  padding-bottom: calc(20px + var(--safe-bottom));
+  background: linear-gradient(180deg, rgba(243, 223, 191, 0) 0, #f3dfbf 14px);
+}
+
+/* ================= новая графика ================= */
+
+/* кухня: обои в мелкий цветочек, тёплый свет из окна */
+#app {
+  background:
+    radial-gradient(130% 60% at 50% -5%, rgba(255, 244, 214, 0.95) 0%, rgba(255, 244, 214, 0) 65%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d9a066' fill-opacity='.16'%3E%3Ccircle cx='14' cy='14' r='3'/%3E%3Ccircle cx='10' cy='11' r='2.2'/%3E%3Ccircle cx='18' cy='11' r='2.2'/%3E%3Ccircle cx='10' cy='17' r='2.2'/%3E%3Ccircle cx='18' cy='17' r='2.2'/%3E%3C/g%3E%3Ccircle cx='14' cy='14' r='1.2' fill='%23c0573a' fill-opacity='.25'/%3E%3Cpath d='M42 40c3-4 7-4 9-1-3 3-6 3-9 1z' fill='%238aa65a' fill-opacity='.18'/%3E%3Ccircle cx='42' cy='42' r='1.6' fill='%23c0573a' fill-opacity='.2'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(180deg, #fbf0dc 0%, #f2dcb8 100%);
+}
+
+.jar {
+  width: auto;
+  line-height: 0;
+}
+
+.jar-svg {
+  display: block;
+  overflow: visible;
+}
+
+.jar-svg .lid,
+.jar-svg .label,
+.jar-svg .layer {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+.jar-svg .label {
+  transform-origin: 50% 50%;
+}
+
+/* выбранная банка: тёплое свечение по контуру */
+.slot.selected .jar-svg {
+  filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 5px rgba(217, 72, 43, 0.95)) drop-shadow(0 8px 8px rgba(60, 35, 15, 0.25));
+}
+
+/* деревянная полка: доска с волокнами, кромка, тень и кронштейны */
+.row::after {
+  height: 16px;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(90deg, rgba(90, 50, 20, 0.12) 0 2px, transparent 2px 23px, rgba(255, 220, 170, 0.12) 23px 25px, transparent 25px 61px),
+    linear-gradient(180deg, #c48a55 0 30%, #a86f3f 30% 62%, #7e4f2a 62% 100%);
+  box-shadow:
+    0 6px 10px rgba(60, 35, 15, 0.35),
+    inset 0 1px 0 rgba(255, 230, 190, 0.6);
+}
+
+.fx-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* мелкие банки (полки победы, кладовой, главного экрана) — тот же рисунок */
+.mini-jar {
+  width: auto;
+  height: auto;
+  line-height: 0;
+}
+
+.mini-jar .jar-svg {
+  display: block;
+}
+
+.hero-shelf .mini-jar,
+.win-shelf .mini-jar {
+  transform: none;
+  margin: 0;
+}
+
+.hero-shelf {
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.win-shelf {
+  gap: 4px;
+}
+
+.shelf-jars::before {
+  top: 54px;
+}
+
+.mini-jar.empty-spot {
+  width: 30px;
+  height: 40px;
+  margin-top: 6px;
+}
+
+.hero-shelf::after,
+.win-shelf::after,
+.shelf-jars::after,
+.shelf-jars::before {
+  height: 14px;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(90deg, rgba(90, 50, 20, 0.12) 0 2px, transparent 2px 23px, rgba(255, 220, 170, 0.12) 23px 25px, transparent 25px 61px),
+    linear-gradient(180deg, #c48a55 0 30%, #a86f3f 30% 62%, #7e4f2a 62% 100%);
+  box-shadow:
+    0 6px 10px rgba(60, 35, 15, 0.3),
+    inset 0 1px 0 rgba(255, 230, 190, 0.6);
+}
+
+.intro-pic {
+  display: flex;
+  justify-content: center;
+  margin: -4px 0 16px;
+}
+
+/* ================= механики, задания, оформление, комнаты ================= */
+
+.praise {
+  position: absolute;
+  white-space: nowrap;
+  font-size: 26px;
+  font-weight: 900;
+  color: #fff;
+  -webkit-text-stroke: 1.5px var(--accent-dark);
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 var(--accent-dark), 0 6px 10px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+/* главный экран: 4 кнопки сеткой 2×2 и рисованная кухня */
+.menu-row {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.menu-btn {
+  min-height: 56px;
+}
+
+.badge-count {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  border: 2px solid #fff;
+}
+
+.kitchen-box {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.kitchen {
+  width: 100%;
+  max-width: 420px;
+  max-height: 34vh;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(60, 35, 15, 0.2);
+}
+
+.hero {
+  gap: 10px;
+}
+
+.main-screen .game-title {
+  font-size: clamp(30px, 9vw, 40px);
+}
+
+/* задания */
+.quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.quest {
+  padding: 12px;
+  border-radius: 14px;
+  background: #fff;
+  border: 2px solid #e2c48d;
+}
+
+.quest.done {
+  border-color: #5a9e3a;
+  background: #f3fbea;
+}
+
+.quest-text {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.quest-bar {
+  position: relative;
+  height: 26px;
+  border-radius: 999px;
+  background: #f1e3c8;
+  overflow: hidden;
+}
+
+.quest-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #8fd16a, #5a9e3a);
+}
+
+.quest-count {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.quest-reward {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-weight: 800;
+}
+
+.quest-reward .coin-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.quest-claim {
+  margin-left: auto;
+  min-height: 48px;
+  padding: 6px 18px;
+}
+
+.quest-banner {
+  border-color: #5a9e3a;
+  background: #f3fbea;
+}
+
+/* магазин оформления */
+.shop-screen .topbar .coin-pill {
+  flex: none;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 14px 8px;
+}
+
+.tab {
+  min-height: 52px;
+  border-radius: 14px;
+  border: 2px solid #c9a27a;
+  background: var(--cream);
+  font-size: 19px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: var(--accent);
+  border-color: var(--accent-dark);
+  color: #fff;
+}
+
+.shop-preview {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 6px 0 14px;
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+  gap: 10px;
+  align-content: start;
+}
+
+.shop-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid #e2c48d;
+  text-align: center;
+}
+
+.shop-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(217, 72, 43, 0.2);
+}
+
+.shop-name {
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.15;
+  min-height: 40px;
+  display: grid;
+  place-items: center;
+}
+
+.shop-btn {
+  width: 100%;
+  min-height: 48px;
+  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 18px;
+}
+
+.shop-btn .coin-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.shop-btn.poor {
+  opacity: 0.6;
+}
+
+/* комнаты кладовой */
+.room-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 8px;
+}
+
+.room-nav .icon-btn:disabled {
+  opacity: 0.35;
+}
+
+.room-title {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.room-title b {
+  font-size: 22px;
+}
+
+.room-title span {
+  font-size: 16px;
+  color: var(--ink-soft);
+}
+
+.room-scene-box {
+  margin-bottom: 12px;
+}
+
+.room-scene {
+  display: block;
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(60, 35, 15, 0.22);
+}
+
+/* ---------- магазин и реклама ---------- */
+
+.main-screen,
+.win-screen {
+  overflow-y: auto;
+}
+
+.menu-wide {
+  grid-column: 1 / -1;
+}
+
+.btn:disabled,
+.act:disabled,
+.icon-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
+
+.btn-reward {
+  background: #357a43;
+  border-color: #245c30;
+  box-shadow: 0 4px 0 #245c30;
+  color: #fff;
+}
+
+.ad-demo {
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  margin: 18px auto;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 44px;
+  animation: dot-pulse 1s ease-in-out infinite;
+}
+
+.shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shop-note {
+  margin: 0 0 4px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff3c4;
+  border: 2px solid #d7ad4c;
+  line-height: 1.35;
+}
+
+.shop-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #e2c48d;
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.94);
+  box-shadow: 0 4px 0 #d2b185;
+}
+
+.shop-item-title {
+  margin: 0 0 4px;
+  font-size: 23px;
+}
+
+.shop-item-description {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+
+.shop-item-coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-weight: 800;
+}
+
+.shop-item-coins .coin-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.shop-buy {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.win-screen > * {
+  flex-shrink: 0;
+}
+
+.win-buttons {
+  padding-top: 12px;
+}
+
+@media (max-height: 650px) {
+  .hero {
+    min-height: 180px;
+  }
+
+  .hero .game-title {
+    font-size: 34px;
+  }
+
+  .hero .kitchen {
+    max-height: 25vh;
+  }
+}

@@ -1,0 +1,9 @@
+[
+  { "coins": 20 },
+  { "undo": 2 },
+  { "coins": 40 },
+  { "jars": 1 },
+  { "coins": 60 },
+  { "undo": 3 },
+  { "coins": 100, "jars": 1 }
+]

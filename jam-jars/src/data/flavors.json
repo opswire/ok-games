@@ -1,0 +1,86 @@
+[
+  {
+    "id": 0,
+    "key": "strawberry",
+    "name": "Клубника",
+    "color": "#e53935",
+    "gen": "клубники"
+  },
+  {
+    "id": 1,
+    "key": "raspberry",
+    "name": "Малина",
+    "color": "#ff8ab5",
+    "gen": "малины"
+  },
+  {
+    "id": 2,
+    "key": "apricot",
+    "name": "Абрикос",
+    "color": "#ffc04d",
+    "gen": "абрикоса"
+  },
+  {
+    "id": 3,
+    "key": "blackcurrant",
+    "name": "Смородина",
+    "color": "#33213f",
+    "gen": "смородины"
+  },
+  {
+    "id": 4,
+    "key": "gooseberry",
+    "name": "Крыжовник",
+    "color": "#62a83a",
+    "gen": "крыжовника"
+  },
+  {
+    "id": 5,
+    "key": "cherry",
+    "name": "Вишня",
+    "color": "#6d1029",
+    "gen": "вишни"
+  },
+  {
+    "id": 6,
+    "key": "plum",
+    "name": "Слива",
+    "color": "#8a63c4",
+    "gen": "сливы"
+  },
+  {
+    "id": 7,
+    "key": "seabuckthorn",
+    "name": "Облепиха",
+    "color": "#ff7a1a",
+    "gen": "облепихи"
+  },
+  {
+    "id": 8,
+    "key": "blueberry",
+    "name": "Черника",
+    "color": "#3b5fd9",
+    "gen": "черники"
+  },
+  {
+    "id": 9,
+    "key": "apple",
+    "name": "Яблоко",
+    "color": "#d9d36a",
+    "gen": "яблочного варенья"
+  },
+  {
+    "id": 10,
+    "key": "pear",
+    "name": "Груша",
+    "color": "#b89466",
+    "gen": "грушевого варенья"
+  },
+  {
+    "id": 11,
+    "key": "lingonberry",
+    "name": "Брусника",
+    "color": "#c2185b",
+    "gen": "брусники"
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "lids": [
+    { "id": "red", "name": "Красная клетка", "price": 0 },
+    { "id": "blue", "name": "Синяя клетка", "price": 120 },
+    { "id": "green", "name": "Зелёная клетка", "price": 120 },
+    { "id": "polka", "name": "Красный горошек", "price": 200 },
+    { "id": "flowers", "name": "Ситец в цветочек", "price": 300 },
+    { "id": "linen", "name": "Лён с кружевом", "price": 400 },
+    { "id": "gold", "name": "Золотая крышка", "price": 600 },
+    { "id": "violet", "name": "Сиреневая клетка", "price": 180 },
+    { "id": "honey", "name": "Медовый горошек", "price": 240 },
+    { "id": "stripes", "name": "Полосатый ситец", "price": 340 },
+    { "id": "velvet", "name": "Вишнёвый вельвет", "price": 480 }
+  ],
+  "labels": [
+    { "id": "paper", "name": "Белая бумажная", "price": 0 },
+    { "id": "kraft", "name": "Крафтовая", "price": 100 },
+    { "id": "round", "name": "Круглая с каймой", "price": 150 },
+    { "id": "heart", "name": "Сердечко", "price": 250 },
+    { "id": "ribbon", "name": "Лента", "price": 300 },
+    { "id": "lace", "name": "Кружевная", "price": 350 },
+    { "id": "oval", "name": "Овальная", "price": 180 },
+    { "id": "tag", "name": "Бирка на верёвочке", "price": 220 },
+    { "id": "berry", "name": "Ягодная рамка", "price": 280 },
+    { "id": "stitch", "name": "С вышивкой", "price": 320 }
+  ]
+}

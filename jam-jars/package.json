@@ -1,0 +1,27 @@
+{
+  "name": "jam-jars",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:browser": "node scripts/smoke.js && node scripts/release-check.js",
+    "server": "node server/payments.js",
+    "check": "npm test && npm run build",
+    "levels:report": "node scripts/levels-report.js"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-legacy": "^8.2.4",
+    "playwright-core": "^1.65.0",
+    "terser": "^5.51.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  },
+  "dependencies": {
+    "@vkontakte/vk-bridge": "^3.0.2"
+  }
+}
